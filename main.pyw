@@ -1,4 +1,11 @@
-from tkinter import Tk, Frame, Button, Label
+# TODO
+# Create labels after api call has been made
+# Create a combo box for all crypto data
+# Create labels for all cryptos
+
+
+from tkinter import Tk, Frame, LabelFrame, Button, Label
+from tkinter import ttk
 import json
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
@@ -10,30 +17,52 @@ class Crypto_Gui(Tk):
 
         self.title("Crypto Price GUI")
         self.geometry("+900+300")
+        self.crypto_data = self.clean_crypto_data(self.get_crypto_data())
+        self.crypto_select_box = ttk.Combobox(self, value=["BTC", "Eth"])
+        self.crypto_select_box.grid(row=0, column=0, padx=20, pady=20)
 
-        self.info_button = Button(self, text="Get Info", command=self.get_crypto_data)
-        self.info_button.grid(row=0, column=0)
+        self.labels_frame = LabelFrame(self, text="Labels")
+        self.labels_frame.grid(row=1, column=1)
+
+        self.info_button = Button(
+            self,
+            text="Get Info",
+            command=lambda: print(json.dumps(self.crypto_data, indent=2)),
+        )
+        self.info_button.grid(row=2, column=0)
 
     def get_crypto_data(self):
         """Call the coinmarketcap API and get current crypto information."""
 
         API_KEY = "baf0940b-64a8-4015-a41c-3e2df1009ad9"
         url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
-        parameters = {
-            "start": "1",
-            "limit": "10",
-            "convert": "USD"
-        }
+        parameters = {"start": "1", "limit": "10", "convert": "USD"}
         headers = {"Accepts": "application/json", "X-CMC_PRO_API_KEY": API_KEY}
         session = Session()
         session.headers.update(headers)
 
         try:
             response = session.get(url, params=parameters)
-            crypto_info = json.loads(response.text)["data"]
-            print(json.dumps(crypto_info, indent=2))
+            return json.loads(response.text)["data"]
+            # print(json.dumps(crypto_info, indent=2))
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             print(e)
+
+    def clean_crypto_data(self, crypto_data):
+        """Clean the crypto data by returning only the name, symbol, and price."""
+
+        clean_data = []
+        for crypto in crypto_data:
+            info_dict = {}
+            info_dict["name"] = crypto.get("name", "not found")
+            info_dict["symbol"] = crypto.get("symbol", "not found")
+            info_dict["price"] = crypto["quote"]["USD"].get("price", "not found")
+            clean_data.append(info_dict)
+
+        return clean_data
+
+    def create_name_list(self):
+        pass
 
     def create_crypto_label(self):
         pass
