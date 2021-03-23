@@ -18,18 +18,13 @@ class Crypto_Gui(Tk):
         self.title("Crypto Price GUI")
         self.geometry("+900+300")
         self.crypto_data = self.clean_crypto_data(self.get_crypto_data())
-        self.crypto_select_box = ttk.Combobox(self, value=["BTC", "Eth"])
+        self.crypto_select_box = ttk.Combobox(
+            self, value=self.create_name_list(self.crypto_data)
+        )
         self.crypto_select_box.grid(row=0, column=0, padx=20, pady=20)
 
         self.labels_frame = LabelFrame(self, text="Labels")
         self.labels_frame.grid(row=1, column=1)
-
-        self.info_button = Button(
-            self,
-            text="Get Info",
-            command=lambda: print(json.dumps(self.crypto_data, indent=2)),
-        )
-        self.info_button.grid(row=2, column=0)
 
     def get_crypto_data(self):
         """Call the coinmarketcap API and get current crypto information."""
@@ -61,8 +56,14 @@ class Crypto_Gui(Tk):
 
         return clean_data
 
-    def create_name_list(self):
-        pass
+    def create_name_list(self, crypto_data):
+        """Creating a list of only the crypto names."""
+
+        crypto_name_list = []
+        for crypto in crypto_data:
+            crypto_name_list.append(crypto.get("name"))
+
+        return crypto_name_list
 
     def create_crypto_label(self):
         pass
