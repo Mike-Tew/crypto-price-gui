@@ -22,9 +22,17 @@ class Crypto_Gui(Tk):
             self, value=self.create_name_list(self.crypto_data)
         )
         self.crypto_select_box.grid(row=0, column=0, padx=20, pady=20)
+        self.crypto_select_box.bind("<<ComboboxSelected>>", self.create_crypto_label)
+        self.crypto_select_box.set("Select Currency")
 
-        self.labels_frame = LabelFrame(self, text="Labels")
-        self.labels_frame.grid(row=1, column=1)
+        self.labels_frame = LabelFrame(self, text="Selected Currencies")
+        self.labels_frame.grid(row=1, column=0)
+        self.test_label = Label(self.labels_frame, text="First One")
+        self.test_label.pack()
+        print(self.crypto_data)
+
+        for crypto in self.crypto_data:
+            print(crypto["name"])
 
     def get_crypto_data(self):
         """Call the coinmarketcap API and get current crypto information."""
@@ -39,7 +47,6 @@ class Crypto_Gui(Tk):
         try:
             response = session.get(url, params=parameters)
             return json.loads(response.text)["data"]
-            # print(json.dumps(crypto_info, indent=2))
         except (ConnectionError, Timeout, TooManyRedirects) as e:
             print(e)
 
@@ -65,8 +72,18 @@ class Crypto_Gui(Tk):
 
         return crypto_name_list
 
-    def create_crypto_label(self):
-        pass
+    def create_crypto_label(self, event):
+        label_data = {}
+        for crypto in self.crypto_data:
+            if crypto["name"] == self.crypto_select_box.get():
+                label_data = crypto
+
+        my_label = Label(
+            self.labels_frame,
+            text=f"{label_data['symbol']} {label_data['name']} ${label_data['price']:.2f}",
+        )
+        my_label.pack()
+        print(label_data)
 
 
 if __name__ == "__main__":
